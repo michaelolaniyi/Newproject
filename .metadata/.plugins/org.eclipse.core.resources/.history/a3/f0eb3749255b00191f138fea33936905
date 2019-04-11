@@ -1,0 +1,163 @@
+package searchEngine;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+
+
+    public class Graphics9 extends JFrame implements ActionListener,MouseListener{
+    private JPanel myPanel;
+	private FileHandler fileH;
+    private JTextField searchBox;
+	private JButton search;
+	private JButton addFile;
+	private JButton removeFile;
+	private JLabel location;
+	private JLabel textLabel;
+	private JTextArea addFileField;
+	private JComboBox<String> combo;
+	private JFileChooser filec;
+	private File chosenFile;
+	private int value;
+	private String txt = ".txt";
+	private ArrayList<String> allFiles;
+	private  String[] array;
+	private String extention;
+	//String[] paths =;
+	
+	public Graphics9(String title)
+	  {
+		   super("Search Engine");
+		   
+		   //Lists
+		   fileH = new FileHandler();
+		   allFiles = fileH.getAllFiles();
+		   System.out.println(allFiles.toString());
+		
+		   setLayout(new BorderLayout());
+		   
+		   //panels
+		   myPanel = new JPanel();
+		  
+		   //Objects
+		   array = allFiles.toArray(new String[allFiles.size()]);
+		   searchBox = new JTextField("Enter search",10);
+		   search = new JButton("SEARCH");
+		   addFile = new JButton("Add File");
+		   filec = new JFileChooser();
+		   addFileField = new JTextArea();
+		   removeFile = new JButton("Remove File");
+		   location = new JLabel("Where would you like the search location to be:");
+		   textLabel = new JLabel("Enter the file name to delete");
+		   combo = new JComboBox<String>(array);
+		   
+		   //file chooser
+		   filec.setCurrentDirectory(new java.io.File("michaels-project"));
+		   filec.setDialogTitle("Select file to be added");
+		   filec.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		   
+		   
+		   //Sizes
+		   setSize(500,500);
+		   setLocation(100,100);
+		   
+		   // add the panel to the screen  - uses the add() method of JFrame to do this. 
+		   add(myPanel);
+		   
+		   //Adding stuff to your panel
+		   myPanel.add(searchBox);
+		   myPanel.add(search);
+		   myPanel.add(location);
+		   myPanel.add(combo);
+		   myPanel.add(addFile);
+		   myPanel.add(removeFile);
+		   
+		   //ACTION LISTENERS
+		   search.addActionListener(this);
+		   addFile.addActionListener(this);
+		   removeFile.addActionListener(this);
+		   searchBox.addActionListener(this);
+		   combo.addActionListener(this);
+		   
+		   //Tips 
+		   searchBox.setToolTipText("Enter Search");
+		   addFileField.setToolTipText("Enter the file name to add to filesystem");
+		   
+
+		   setVisible(true);
+		   
+	 }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getSource() == addFile) {
+			myPanel.add(addFileField);
+			
+			value = filec.showOpenDialog(null);
+			
+			
+			
+			if (value == JFileChooser.APPROVE_OPTION) {
+				chosenFile = filec.getSelectedFile();
+				String name = chosenFile.getName();
+				String[] ext = name.split("\\.");
+				extention = ext[1];
+				if (txt == extention) {
+					fileH.addFile(name);
+					combo.addItem(name);
+				}
+				else {
+					JOptionPane.showMessageDialog(this,"You need to select a text file!!(Ends in .txt)");
+				}
+			}
+		
+			
+		}
+
+		
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+
+	}
+	
+	
+}
