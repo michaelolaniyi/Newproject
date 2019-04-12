@@ -11,7 +11,6 @@ public class FileHandler {
 	// File class variables
 	private String nameFile;
 	boolean fileExists;
-	private String url;
 	private int index;
 	ArrayList<String> allFiles;
 	HashMap<String,String> fileDetails;
@@ -22,21 +21,13 @@ public class FileHandler {
 		this.nameFile = nameFile;
 	}
 	
-	
-	/*public FileHandler(String url,String nameFile) {
-		fileDetails = new HashMap<String,String>();
-		this.nameFile = nameFile;
-		this.url = url;
-		allFiles = new ArrayList<String>();
-	
-	}*/
-	
 	public FileHandler() {
 		fileDetails = new HashMap<String,String>();
 		allFiles = new ArrayList<String>();
-		allFiles.add("All");
 		allFiles.add("roles.txt");
 		allFiles.add("random.txt");
+		fileDetails.put("roles.txt", "roles.txt");
+		fileDetails.put("random.txt", "random.txt");
 		
 	}
 
@@ -48,7 +39,7 @@ public class FileHandler {
 		try {
 			Scanner fileRead = new Scanner(files);
 			while(fileRead.hasNextLine()) {
-				String line = fileRead.nextLine();
+				String line = fileRead.next();
 				System.out.println(line);
 			}
 			fileRead.close();
@@ -60,28 +51,30 @@ public class FileHandler {
 	}
 	
 	//Method for checking if a word is in a file	
-	public  boolean wordIsIn() {
-		boolean exists = false;
-		File files = new File(this.nameFile);
+	public  String wordIsIn(String path, String text) {
+	    
+		File files = new File(path);
+		String defaultReturn = "\nThe word "+text+" is not found in: "+ files.getName();
 		try {
 			Scanner fileRead = new Scanner(files);
 			while(fileRead.hasNextLine()) {
-				String line = fileRead.nextLine();
-				if(url.equals(line)) {
-					exists = true;
-					return exists;
+				String line = fileRead.next();
+				System.out.println(line);
+				if(text.equals(line)) {
+					
+					return "\nYes!! the word "+text+" is in the file: "+files.getName();
 					
 				}
-				fileRead.close();
-			}
+				
 
+			}
+			fileRead.close();
 		}
 		catch(Exception e) {
 			System.out.println("The file may have not been found");
 
 		}
-		
-		return exists;
+		return defaultReturn;
 	}
 	
 	public ArrayList<String> getAllFiles() {
@@ -95,7 +88,12 @@ public class FileHandler {
 	public void addFileDetails(String name, String url) {
 		fileDetails.put(name, url);
 	}
-	
+	public HashMap<String,String> getFileDetails(){
+		return fileDetails;
+	}
+	public void removeFileDetail(String name) {
+		fileDetails.remove(name);
+	}	
 	public void removeFile(String name) {
 		for(int i=0; i < allFiles.size(); i++) {
 			if (name.equals(allFiles.get(i))) {

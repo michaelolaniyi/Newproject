@@ -7,15 +7,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
@@ -23,11 +24,16 @@ import javax.swing.JFileChooser;
 
 
     public class Graphics9 extends JFrame implements ActionListener,MouseListener{
+    //Frames
+    private JFrame frame;
+    private JFrame frame2;
+    //Panels
     private JPanel myPanel;
     private JPanel myPanel1;
     private JPanel myPanel2;
     private JPanel myPanel3;
     private JPanel myPanel4;
+    private JPanel myPanelf1;
     //files
 	private FileHandler fileH;
 	private JFileChooser filec;
@@ -39,37 +45,48 @@ import javax.swing.JFileChooser;
 	private JButton addFile;
 	private JButton removeFile;
 	//Labels
+	private JLabel results;
 	private JLabel location;
 	private JLabel searchText;
-	//list arrays combos
+	private JLabel addFileText;
+	private JLabel removeFileText;
+	//list arrays combo
 	private JComboBox<String> combo;
 	private JComboBox<String> combo2;
 	private ArrayList<String> allFiles;
+	private HashMap<String,String> fileDetails;
 	private  String[] array;
 	//Random
 	private int value;
 	private String txt = "txt";
 	private String extention;
-	private String url;
+	private String path;
 	private String name;
-	private int index;
-	
+	private String searchLocal;
+	private String found;
+	//TextArea
+	private JTextArea areaMain;
+
 	public Graphics9(String title)
 	  {
 		   super("Search Engine");
 		   
-		   JFrame frame = new JFrame();
+		   frame = new JFrame("SEARCH ENGINE");
+		   frame2 = new JFrame("RESULTS");
 		   
 		   //Lists
 		   fileH = new FileHandler();
 		   allFiles = fileH.getAllFiles();
+		   fileDetails = fileH.getFileDetails();
 		   array = allFiles.toArray(new String[allFiles.size()]);
 		   
 		   //panels
+		   myPanel = new JPanel();
 		   myPanel1 = new JPanel();
 		   myPanel2 = new JPanel();
 		   myPanel3 = new JPanel();
 		   myPanel4 = new JPanel();
+		   myPanelf1 = new JPanel();
 
 		   //Objects
 		   //Buttons
@@ -79,12 +96,17 @@ import javax.swing.JFileChooser;
 		   //text fields
 		   searchBox = new JTextField("",15);
 		   //Labels
-		   searchText = new JLabel("Enter search here: ");
-		   location = new JLabel("Where would you like the search location to be:");
+		   searchText = new JLabel("Enter search term here: ");
+		   addFileText = new JLabel("Click here to add file to the search area:");
+		   removeFileText = new JLabel("Choose the file you would like to remove from the search area");
+		   location = new JLabel("These are the files being searched:");
+		   results = new JLabel("These are the search results");
 		   //combo
 		   combo = new JComboBox<String>(array);
 		   combo2 = new JComboBox<String>(array);
 		   combo2.removeItem("All");
+		   //Text areas
+		   areaMain = new JTextArea();
 		   
 		   //file chooser
 		   filec = new JFileChooser();
@@ -95,26 +117,36 @@ import javax.swing.JFileChooser;
 		   
 		   //Sizes
 		   frame.setSize(500,500);
+		   frame2.setSize(250,500);
 		   frame.setLayout(new GridLayout(4, 0));
+		   frame2.setLayout(new GridLayout(2,0));
 		   frame.setResizable(false);
+		   myPanel.setLayout(new GridLayout(2,0));
 		
 		   
 		   // add the panel to the screen  - uses the add() method of JFrame to do this. 
+		   frame.add(myPanel);
 		   frame.add(myPanel1);
 		   frame.add(myPanel2);
 		   frame.add(myPanel3);
 		   frame.add(myPanel4);
-
+		   frame2.add(myPanelf1);
 		   
 		   //Adding stuff to your panel
+		   myPanel.add(myPanel1);
+		   myPanel.add(myPanel2);
 		   myPanel1.add(searchText);
 		   myPanel1.add(searchBox);
 		   myPanel1.add(search);
 		   myPanel2.add(location);
 		   myPanel2.add(combo);
+		   myPanel3.add(addFileText);
 		   myPanel3.add(addFile);
+		   myPanel4.add(removeFileText);
 		   myPanel4.add(combo2);
 		   myPanel4.add(removeFile);
+		   myPanelf1.add(results);
+		   myPanelf1.add(areaMain);		   
 		   
 		   //ACTION LISTENERS
 		   search.addActionListener(this);
@@ -127,13 +159,17 @@ import javax.swing.JFileChooser;
 		   //Tips 
 		   searchBox.setToolTipText("Enter Search");
 		   
-
+		   frame2.setVisible(false);
 		   frame.setVisible(true);
 		   frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 	 }
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == search) {
+			searchMethod();
+		}
 		
 		if (e.getSource() == addFile) {	
 			addFile();
@@ -172,7 +208,7 @@ import javax.swing.JFileChooser;
 		value = filec.showOpenDialog(null);	
 		if (value == JFileChooser.APPROVE_OPTION) {
 			chosenFile = filec.getSelectedFile();
-			url = chosenFile.toString();
+			path = chosenFile.toString();
 			name = chosenFile.getName();
 			String[] ext = name.split("\\.");
 			extention = ext[1];
@@ -180,8 +216,10 @@ import javax.swing.JFileChooser;
 				fileH.addFile(name);
 				combo.addItem(name);
 				combo2.addItem(name);
-				fileH.addFileDetails(name,url);
-				System.out.println(fileH.fileDetails.get(name));	
+				fileH.addFileDetails(name,path);
+				String success = name+" has succesfully been added \n Path is:"+path;
+				System.out.println(fileH.getFileDetails());
+				JOptionPane.showMessageDialog(this,success);
 			}
 			else {
 				JOptionPane.showMessageDialog(this,"You need to select a text file!!(Ends in .txt)");
@@ -192,12 +230,31 @@ import javax.swing.JFileChooser;
 	}
 	
 	public void removeFile() {
-		   combo2.addItem("");
-		   System.out.println(combo2.getSelectedItem());
+		   System.out.println("this is what removed is"+combo2.getSelectedItem().toString());
+		   String removed = combo2.getSelectedItem().toString();
+		   fileH.removeFile(removed);
+		   combo.removeItem(removed);
+		   combo2.removeItem(removed);
+		   fileH.removeFileDetail(removed);
+		   myPanel1.revalidate();
+		   myPanel1.repaint();
 		   myPanel4.revalidate();
 		   myPanel4.repaint();
+		   System.out.println(fileH.getFileDetails());
+
 
 	}
-	
+	public void searchMethod() {
+		areaMain.setText("");
+		String text = searchBox.getText();
+		System.out.println(fileH.getFileDetails());
+		for(int p = 0;p < fileH.getFileDetails().size();p++) {
+			searchLocal = fileH.getFileDetails().get(allFiles.get(p));
+			found = fileH.wordIsIn(searchLocal, text);
+			areaMain.append(found);
+		}
+		frame2.setVisible(true);
+		
+	}
 	
 }
